@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+
+# Local configuration
+conf/local/*
+!conf/local/.gitkeep
+
+# Generated data and artifacts
+data/**/*
+!data/**/
+!data/**/.gitkeep
+!data/01_raw/sp500_yahoo_finance_raw.csv
+mlruns/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Report Guidelines
+MLOps_project.pdf
