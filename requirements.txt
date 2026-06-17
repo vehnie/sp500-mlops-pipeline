@@ -1,0 +1,17 @@
+kedro
+kedro-datasets
+yfinance
+pandas
+numpy
+scikit-learn
+xgboost
+matplotlib
+seaborn
+mlflow
+shap
+fastapi
+uvicorn
+pydantic
+great_expectations
+evidently
+pytest
