@@ -199,6 +199,8 @@ Required columns:
 - `Adj Close`
 - `Volume`
 
+`Close` is the official price source for all price-derived features, returns, technical indicators, future returns, and targets; `Adj Close` is retained in the raw and cleaned schemas but is not used for feature engineering or label creation.
+
 Default target:
 
 ```text
@@ -387,10 +389,115 @@ kedro run --pipeline=model_selection
 kedro run --pipeline=data_drifts
 ```
 
-### 5. Serve the model
+### 5. Serve the candidate-champion model
 
-```bash
-uvicorn app.main:app --reload
+Activate the project environment:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+The MLflow server must proxy artifacts instead of returning Windows-local
+`file:///C:/...` paths to clients. If this project database was created before
+artifact proxying was enabled, stop MLflow and run this one-time, idempotent
+migration from the repository root:
+
+```powershell
+python .\scripts\migrate_mlflow_artifact_uris.py
+```
+
+The migration changes only artifact-location metadata, creates
+`mlflow.db.before-artifact-proxy.bak`, and does not modify model files, runs,
+metrics, registered versions, or aliases.
+
+Start the local MLflow Tracking Server and Model Registry:
+
+```powershell
+$artifactUri = [System.Uri]::new(
+    (Resolve-Path .\data\08_reporting\mlflow_artifacts).Path
+).AbsoluteUri
+
+mlflow server --host 127.0.0.1 --port 5000 `
+  --backend-store-uri sqlite:///mlflow.db `
+  --default-artifact-root mlflow-artifacts:/ `
+  --serve-artifacts `
+  --artifacts-destination $artifactUri
+```
+
+Start the FastAPI application:
+
+```powershell
+uvicorn sp500_mlops_pipeline.serving.app:app --reload --port 8000
+```
+
+Open the automatic API documentation:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### 6. Run the local MLOps dashboard
+
+Ensure Streamlit is installed in the active environment, then run:
+
+```powershell
+streamlit run streamlit_app.py
+```
+
+The dashboard is read-only and uses the existing Great Expectations reports,
+model metrics, predictions, and SHAP explainability artefacts under `data/`.
+
+### 7. Run the FastAPI application with Docker
+
+Confirm that Docker Desktop is open.
+
+Start MLflow on the Windows host so it is reachable from Docker:
+
+```powershell
+$artifactUri = [System.Uri]::new(
+    (Resolve-Path .\data\08_reporting\mlflow_artifacts).Path
+).AbsoluteUri
+
+mlflow server --host 0.0.0.0 --port 5000 `
+  --allowed-hosts "localhost:*,127.0.0.1:*,host.docker.internal:5000" `
+  --backend-store-uri sqlite:///mlflow.db `
+  --default-artifact-root mlflow-artifacts:/ `
+  --serve-artifacts `
+  --artifacts-destination $artifactUri
+```
+
+Run the one-time URI migration shown in step 5 before this command if the
+database still contains `file:///C:/...` artifact locations. With this setup,
+the Registry returns `mlflow-artifacts:/...` locations and the container
+downloads the selected model through the MLflow HTTP server.
+
+The explicit `file:///...` URI is important on Windows: passing a raw
+`C:\...` path makes MLflow interpret the drive letter as an artifact-store
+scheme.
+
+Build the API image:
+
+```powershell
+docker build -t sp500-direction-api .
+```
+
+Run the container:
+
+```powershell
+docker run --rm -p 8000:8000 -e MLFLOW_TRACKING_URI=http://host.docker.internal:5000 sp500-direction-api
+```
+
+Open the API documentation and health endpoint:
+
+```text
+http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/health
+```
+
+Stop the foreground container with `Ctrl+C`. If it was started with `-d`, use:
+
+```powershell
+docker stop <container-id-or-name>
 ```
 
 ---
