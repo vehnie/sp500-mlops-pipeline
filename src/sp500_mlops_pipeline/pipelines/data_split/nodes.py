@@ -9,7 +9,7 @@ from sp500_mlops_pipeline.pipelines.data_feat_engineering.nodes import (
 )
 
 
-TARGET_COLUMN = "target"
+TARGET_COLUMN = "target_next_day_up"
 DATE_COLUMN = "Date"
 DEFAULT_TRAIN_FRACTION = 0.70
 DEFAULT_VAL_FRACTION = 0.15

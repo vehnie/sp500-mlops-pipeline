@@ -25,6 +25,9 @@ data/**/*
 
 # MLflow
 mlruns/
+mlflow.db
+mlflow.db.*
+*.db.bak
 
 # Jupyter
 .ipynb_checkpoints/
@@ -34,6 +37,8 @@ mlruns/
 Thumbs.db
 .vscode/
 .idea/
+# Office temporary lock files
+~$*
 
 # Report guidelines
 MLOps_project.pdf

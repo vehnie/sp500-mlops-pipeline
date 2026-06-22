@@ -1,4 +1,4 @@
-"""Baseline model training helpers."""
+"""Random Forest challenger model training helpers."""
 
 import io
 import logging
@@ -9,7 +9,7 @@ import mlflow
 import mlflow.sklearn
 import pandas as pd
 from mlflow.models import infer_signature
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -17,40 +17,38 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 
 logger = logging.getLogger(__name__)
 
+RUN_NAME = "random_forest_challenger_v2"
+MODEL_NAME = "random_forest_challenger_model"
 
-def train_and_evaluate_baseline_model(
+
+def train_and_evaluate_challenger_model(
     X_train: pd.DataFrame,
     y_train: pd.DataFrame | pd.Series,
     X_val: pd.DataFrame,
     y_val: pd.DataFrame | pd.Series,
     model_parameters: dict,
     mlflow_parameters: dict,
-) -> tuple[Pipeline, dict[str, float]]:
-    """Train a logistic-regression baseline and evaluate it on validation data."""
-    if model_parameters["model_type"] != "logistic_regression":
-        raise ValueError("Only logistic_regression is supported")
+) -> tuple[RandomForestClassifier, dict[str, float]]:
+    """Train a Random Forest challenger and evaluate it on validation data."""
+    if model_parameters["model_type"] != "random_forest":
+        raise ValueError("Only random_forest is supported")
 
     train_target = _to_series(y_train)
     validation_target = _to_series(y_val)
 
-    model = Pipeline(
-        steps=[
-            ("scaler", StandardScaler()),
-            (
-                "classifier",
-                LogisticRegression(
-                    random_state=model_parameters["random_state"],
-                    max_iter=model_parameters["max_iter"],
-                ),
-            ),
-        ]
+    model = RandomForestClassifier(
+        n_estimators=model_parameters["n_estimators"],
+        max_depth=model_parameters["max_depth"],
+        min_samples_split=model_parameters["min_samples_split"],
+        min_samples_leaf=model_parameters["min_samples_leaf"],
+        class_weight=model_parameters["class_weight"],
+        random_state=model_parameters["random_state"],
     )
+
     mlflow.set_tracking_uri(mlflow_parameters["tracking_uri"])
     experiment_name = mlflow_parameters["experiment_name"]
     experiment = mlflow.get_experiment_by_name(experiment_name)
@@ -66,9 +64,7 @@ def train_and_evaluate_baseline_model(
         experiment_id = experiment.experiment_id
 
     mlflow.set_experiment(experiment_id=experiment_id)
-    with redirect_stdout(io.StringIO()), mlflow.start_run(
-        run_name=mlflow_parameters["run_name"]
-    ) as run:
+    with redirect_stdout(io.StringIO()), mlflow.start_run(run_name=RUN_NAME) as run:
         model.fit(X_train, train_target)
 
         predictions = model.predict(X_val)
@@ -83,20 +79,15 @@ def train_and_evaluate_baseline_model(
             "roc_auc": float(roc_auc_score(validation_target, probabilities)),
         }
 
-        mlflow.log_params(
-            {
-                "model_type": model_parameters["model_type"],
-                "random_state": model_parameters["random_state"],
-                "max_iter": model_parameters["max_iter"],
-            }
-        )
+        mlflow.log_params(model_parameters)
         mlflow.log_metrics(metrics)
         mlflow.set_tags(
             {
                 "dataset": "sp500_feature_data",
                 "split_strategy": "chronological_70_15_15",
-                "model_family": "logistic_regression",
-                "pipeline_stage": "baseline_training",
+                "model_family": "random_forest",
+                "model_role": "challenger",
+                "pipeline_stage": "challenger_training",
             }
         )
         mlflow.log_dict(
@@ -108,13 +99,14 @@ def train_and_evaluate_baseline_model(
         signature = infer_signature(X_train, model.predict(X_train))
         mlflow.sklearn.log_model(
             sk_model=model,
-            name=mlflow_parameters["model_name"],
+            name=MODEL_NAME,
             input_example=input_example,
             signature=signature,
         )
         logger.info(
-            "MLflow run created: experiment=%s, run_id=%s",
+            "MLflow run created: experiment=%s, run_name=%s, run_id=%s",
             experiment_name,
+            RUN_NAME,
             run.info.run_id,
         )
 
