@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 
+import pandas as pd
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -8,14 +9,15 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from sp500_mlops_pipeline.pipelines.data_feat_engineering.nodes import (
     MARKET_FEATURE_COLUMNS,
-    load_clean_and_create_market_feature_dataset,
+    TARGET_COLUMN,
+    create_market_feature_dataset,
 )
 from sp500_mlops_pipeline.pipelines.data_split.nodes import (
     create_time_based_train_val_test_split,
 )
 
 
-RAW_SAMPLE_PATH = Path("data/01_raw/sp500_yahoo_finance_raw.csv")
+RAW_SAMPLE_PATH = PROJECT_ROOT / "data/01_raw/sp500_yahoo_finance_raw.csv"
 EXPECTED_SPLIT_KEYS = {
     "X_train",
     "y_train",
@@ -31,7 +33,8 @@ EXPECTED_SPLIT_KEYS = {
 
 @pytest.fixture()
 def feature_data():
-    return load_clean_and_create_market_feature_dataset(RAW_SAMPLE_PATH)
+    raw_data = pd.read_csv(RAW_SAMPLE_PATH)
+    return create_market_feature_dataset(raw_data)
 
 
 @pytest.fixture()
@@ -88,17 +91,29 @@ def test_y_equals_target_values(feature_data, split_data) -> None:
     train_end = int(len(sorted_features) * 0.70)
     val_end = train_end + int(len(sorted_features) * 0.15)
 
-    assert split_data["y_train"].equals(sorted_features["target"].iloc[:train_end].reset_index(drop=True))
-    assert split_data["y_val"].equals(sorted_features["target"].iloc[train_end:val_end].reset_index(drop=True))
-    assert split_data["y_test"].equals(sorted_features["target"].iloc[val_end:].reset_index(drop=True))
+    assert split_data["y_train"].equals(
+        sorted_features[TARGET_COLUMN].iloc[:train_end].reset_index(drop=True)
+    )
+    assert split_data["y_val"].equals(
+        sorted_features[TARGET_COLUMN].iloc[train_end:val_end].reset_index(drop=True)
+    )
+    assert split_data["y_test"].equals(
+        sorted_features[TARGET_COLUMN].iloc[val_end:].reset_index(drop=True)
+    )
 
 
 def test_real_raw_csv_can_generate_features_and_split_successfully() -> None:
-    feature_data = load_clean_and_create_market_feature_dataset(RAW_SAMPLE_PATH)
+    raw_data = pd.read_csv(RAW_SAMPLE_PATH)
+    feature_data = create_market_feature_dataset(raw_data)
     split_data = create_time_based_train_val_test_split(feature_data)
 
     assert set(split_data.keys()) == EXPECTED_SPLIT_KEYS
-    assert len(split_data["X_train"]) + len(split_data["X_val"]) + len(split_data["X_test"]) == len(feature_data)
+    assert (
+        len(split_data["X_train"])
+        + len(split_data["X_val"])
+        + len(split_data["X_test"])
+        == len(feature_data)
+    )
 
 
 def test_invalid_split_fractions_raise_value_error(feature_data) -> None:

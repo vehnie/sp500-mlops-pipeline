@@ -1,0 +1,12 @@
+{
+  "features": [
+    "simple_return",
+    "log_return",
+    "sma_10",
+    "sma_20",
+    "sma_ratio_10",
+    "rsi_14",
+    "volatility_10",
+    "volume_change"
+  ]
+}

@@ -1,0 +1,113 @@
+sp500_raw_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/sp500_yahoo_finance_raw.csv
+
+sp500_yahoo_finance_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/sp500_yahoo_finance_raw.csv
+
+sp500_validated_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/sp500_validated_data.csv
+
+sp500_cleaned_data:
+  type: pandas.CSVDataset
+  filepath: data/03_primary/sp500_cleaned_data.csv
+
+sp500_feature_data:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/sp500_feature_data.csv
+
+X_train:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/X_train.csv
+
+y_train:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/y_train.csv
+
+dates_train:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/dates_train.csv
+
+X_val:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/X_val.csv
+
+y_val:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/y_val.csv
+
+dates_val:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/dates_val.csv
+
+X_test:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/X_test.csv
+
+y_test:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/y_test.csv
+
+dates_test:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/dates_test.csv
+
+trained_baseline_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/logistic_regression_baseline.pkl
+
+validation_metrics:
+  type: json.JSONDataset
+  filepath: data/07_model_output/validation_metrics.json
+
+trained_challenger_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/random_forest_challenger.pkl
+
+random_forest_validation_metrics:
+  type: json.JSONDataset
+  filepath: data/07_model_output/random_forest_validation_metrics.json
+
+test_predictions:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/test_predictions.csv
+
+test_metrics:
+  type: json.JSONDataset
+  filepath: data/07_model_output/test_metrics.json
+
+random_forest_test_predictions:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/random_forest_test_predictions.csv
+
+random_forest_test_metrics:
+  type: json.JSONDataset
+  filepath: data/07_model_output/random_forest_test_metrics.json
+
+raw_data_validation_report:
+  type: json.JSONDataset
+  filepath: data/08_reporting/great_expectations/raw_data_validation_report.json
+
+feature_data_validation_report:
+  type: json.JSONDataset
+  filepath: data/08_reporting/great_expectations/feature_data_validation_report.json
+
+logistic_regression_v2_global_feature_importance:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/shap/logistic_regression_v2_global_feature_importance.csv
+
+logistic_regression_v2_summary_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/shap/logistic_regression_v2_summary_plot.png
+  overwrite: true
+
+logistic_regression_v2_feature_importance_bar:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/shap/logistic_regression_v2_feature_importance_bar.png
+  overwrite: true
+
+logistic_regression_v2_explainability_summary:
+  type: json.JSONDataset
+  filepath: data/08_reporting/shap/logistic_regression_v2_explainability_summary.json

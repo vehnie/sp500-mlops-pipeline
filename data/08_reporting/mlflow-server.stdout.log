@@ -1,0 +1,18 @@
+Registry store URI not provided. Using backend store URI.
+2026/06/21 20:40:24 INFO:     127.0.0.1:50474 - "GET /health HTTP/1.1" 200 OK
+2026/06/21 20:40:47 INFO:     127.0.0.1:56519 - "GET /api/2.0/mlflow-artifacts/artifacts?path=models%2Fm-09d8d2dd77f049b8a3a306241652cbc7%2Fartifacts HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow/registered-models/alias?name=sp500_direction_model&alias=candidate_champion HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow/registered-models/alias?name=sp500_direction_model&alias=candidate_champion HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow/registered-models/get?name=sp500_direction_model HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow/model-versions/get-download-uri?name=sp500_direction_model&version=1 HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow-artifacts/artifacts?path=models%2Fm-09d8d2dd77f049b8a3a306241652cbc7%2Fartifacts HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow-artifacts/artifacts?path=models%2Fm-09d8d2dd77f049b8a3a306241652cbc7%2Fartifacts HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/MLmodel HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/input_example.json HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63119 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/conda.yaml HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63120 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/python_env.yaml HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63121 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/environment_variables.txt HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63119 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/requirements.txt HTTP/1.1" 200 OK
+2026/06/21 20:41:02 INFO:     127.0.0.1:63122 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/serving_input_example.json HTTP/1.1" 200 OK
+2026/06/21 20:41:03 INFO:     127.0.0.1:63118 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/model.skops HTTP/1.1" 200 OK
+2026/06/21 20:41:03 INFO:     127.0.0.1:63123 - "GET /api/2.0/mlflow-artifacts/artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/registered_model_meta HTTP/1.1" 200 OK
