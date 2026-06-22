@@ -11,6 +11,9 @@ from sp500_mlops_pipeline.pipelines.data_feat_engineering.pipeline import (
 from sp500_mlops_pipeline.pipelines.data_expectations.pipeline import (
     create_pipeline as create_data_expectations_pipeline,
 )
+from sp500_mlops_pipeline.pipelines.data_drifts.pipeline import (
+    create_pipeline as create_data_drifts_pipeline,
+)
 from sp500_mlops_pipeline.pipelines.data_quality.pipeline import (
     create_pipeline as create_data_quality_pipeline,
 )
@@ -46,6 +49,7 @@ def register_pipelines() -> dict[str, Pipeline]:
     model_predict_pipeline = create_model_predict_pipeline()
     model_predict_challenger_pipeline = create_model_predict_challenger_pipeline()
     model_explainability_pipeline = create_model_explainability_pipeline()
+    data_drifts_pipeline = create_data_drifts_pipeline()
 
     return {
         "data_quality": data_quality_pipeline,
@@ -58,6 +62,7 @@ def register_pipelines() -> dict[str, Pipeline]:
         "model_predict": model_predict_pipeline,
         "model_predict_challenger": model_predict_challenger_pipeline,
         "model_explainability": model_explainability_pipeline,
+        "data_drifts": data_drifts_pipeline,
         "__default__": (
             data_quality_pipeline
             + data_cleaning_pipeline

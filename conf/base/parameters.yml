@@ -1,0 +1,9 @@
+data_drifts:
+  # A dataset is flagged as drifted when at least this share of feature
+  # columns drift between the reference and current samples.
+  drift_share_threshold: 0.5
+  # Per-feature Kolmogorov-Smirnov p-value below which a column is drifted.
+  p_value_threshold: 0.05
+  # Mean shift (in reference standard deviations) for the synthetic scenario.
+  synthetic_drift_intensity: 1.5
+  random_state: 42

@@ -537,7 +537,7 @@ feature/report
 - [ ] SHAP or feature importance included in the report
 - [ ] Model serving implemented with FastAPI
 - [ ] Docker container builds and runs
-- [ ] Data drift evaluation implemented
+- [x] Data drift evaluation implemented
 - [ ] Unit tests for relevant functions and pipelines pass
 - [ ] Requirements/package versions listed
 - [ ] Another user can run the pipeline and reproduce the results
