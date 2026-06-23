@@ -94,6 +94,17 @@ feature_data_validation_report:
   type: json.JSONDataset
   filepath: data/08_reporting/great_expectations/feature_data_validation_report.json
 
+data_drift_report:
+  type: text.TextDataset
+  filepath: data/08_reporting/drift/data_drift_report.html
+  fs_args:
+    open_args_save:
+      encoding: utf-8
+
+data_drift_summary:
+  type: json.JSONDataset
+  filepath: data/08_reporting/drift/data_drift_summary.json
+
 logistic_regression_v2_global_feature_importance:
   type: pandas.CSVDataset
   filepath: data/08_reporting/shap/logistic_regression_v2_global_feature_importance.csv
