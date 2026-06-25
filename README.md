@@ -305,48 +305,114 @@ The API is intentionally small: it mainly validates the input features, loads th
 
 ## Getting Started
 
-### 1. Create environment
+This is a step-by-step guide to set up the project and run it end to end. The
+commands are written for **Windows PowerShell** (the project's primary
+environment); equivalent macOS/Linux commands are given where they differ.
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
+### Prerequisites
 
-### 2. Configure data source
+- **Python 3.11 or newer** (validated on 3.11; `pyproject.toml` targets 3.13).
+- **git** to clone the repository.
+- **Docker Desktop** — optional, only needed for the containerised API (Step 11).
 
-The market data settings are stored in:
+> The repository already ships a ready-to-use sample dataset at
+> `data/01_raw/sp500_yahoo_finance_raw.csv`, so **no data download is required**
+> to run the pipeline.
 
-```text
-conf/base/parameters_data.yml
-```
-
-### 3. Run the full default workflow
-
-```bash
-kedro run
-```
-
-### 4. Run selected pipelines
-
-```bash
-kedro run --pipeline=data_quality
-kedro run --pipeline=data_feat_engineering
-kedro run --pipeline=model_train
-kedro run --pipeline=model_train_challenger
-kedro run --pipeline=model_explainability
-kedro run --pipeline=data_drift
-```
-
-### 5. Serve the candidate-champion model locally
-
-Activate the project environment:
+### Step 1 — Clone the repository
 
 ```powershell
+git clone https://github.com/vehnie/sp500-mlops-pipeline.git
+cd sp500-mlops-pipeline
+```
+
+### Step 2 — Create and activate a virtual environment
+
+PowerShell (Windows):
+
+```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Start the local MLflow Tracking Server and Model Registry:
+macOS / Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+> If PowerShell blocks the activation script, allow it for the current session
+> with: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned`.
+
+### Step 3 — Install dependencies
+
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Step 4 — (Optional) Review the data source settings
+
+The provenance of the bundled sample (ticker, date range, interval) is recorded
+in `conf/base/parameters_data.yml`. The default workflow reads the bundled CSV
+directly, so you can skip this step unless you want to regenerate the extract.
+
+### Step 5 — Run the full pipeline
+
+```powershell
+kedro run
+```
+
+This executes the default workflow:
+
+```text
+data_quality -> data_cleaning -> data_feat_engineering -> data_split
+  -> model_train -> model_train_challenger
+  -> model_predict -> model_predict_challenger
+```
+
+It produces the cleaned dataset, feature table, chronological train/validation/
+test splits, the trained champion and challenger models, and their
+predictions/metrics under `data/`.
+
+### Step 6 — (Optional) Run individual pipelines
+
+The reporting and monitoring pipelines are run on demand:
+
+```powershell
+kedro run --pipeline=data_quality
+kedro run --pipeline=data_expectations      # Great Expectations validation reports
+kedro run --pipeline=data_feat_engineering
+kedro run --pipeline=model_train
+kedro run --pipeline=model_train_challenger
+kedro run --pipeline=model_explainability   # SHAP artifacts
+kedro run --pipeline=data_drift             # Evidently drift report
+```
+
+### Step 7 — (Optional) Visualise the pipeline graph
+
+```powershell
+pip install kedro-viz
+kedro viz
+```
+
+Then open the URL it prints (defaults to `http://127.0.0.1:4141`).
+
+### Step 8 — Run the tests
+
+```powershell
+pytest
+```
+
+Expected result: **80 passed, 11 warnings**.
+
+### Step 9 — Serve the champion model (MLflow + FastAPI)
+
+The API loads the champion model from a local MLflow server, so you need **two
+terminals** (both with the virtual environment activated).
+
+**Terminal A — start the MLflow Tracking Server and Model Registry:**
 
 ```powershell
 $artifactUri = [System.Uri]::new(
@@ -360,31 +426,40 @@ mlflow server --host 127.0.0.1 --port 5000 `
   --artifacts-destination $artifactUri
 ```
 
-Start the FastAPI application:
+**Terminal B — start the FastAPI application.** The package lives under `src/`,
+so add it to `PYTHONPATH` first:
 
 ```powershell
+$env:PYTHONPATH = "src"
 uvicorn sp500_mlops_pipeline.serving.app:app --reload --port 8000
 ```
 
-Open the automatic API documentation:
+macOS / Linux equivalent:
+
+```bash
+PYTHONPATH=src uvicorn sp500_mlops_pipeline.serving.app:app --reload --port 8000
+```
+
+Then open the interactive API docs and exercise the endpoints
+(`GET /health`, `GET /model-info`, `POST /predict`):
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-### 6. Run the local dashboard
+### Step 10 — (Optional) Run the dashboard
 
 ```powershell
 streamlit run streamlit_app.py
 ```
 
-The dashboard is read-only and uses existing artifacts from `data/`.
+The dashboard is read-only and renders the existing artifacts under `data/`.
 
-### 7. Run the FastAPI application with Docker
+### Step 11 — (Alternative) Run the API with Docker
 
-Confirm that Docker Desktop is open.
-
-Start MLflow on the Windows host so it is reachable from Docker:
+This replaces Step 9's FastAPI process with a container. Make sure **Docker
+Desktop is running**, then start MLflow on the host so the container can reach
+it at `host.docker.internal:5000`:
 
 ```powershell
 $artifactUri = [System.Uri]::new(
@@ -399,16 +474,17 @@ mlflow server --host 0.0.0.0 --port 5000 `
   --artifacts-destination $artifactUri
 ```
 
-Build the API image:
+Then either build and run the image directly:
 
 ```powershell
 docker build -t sp500-direction-api .
+docker run --rm -p 8000:8000 -e MLFLOW_TRACKING_URI=http://host.docker.internal:5000 sp500-direction-api
 ```
 
-Run the container:
+…or use the bundled Compose file (builds from the root `Dockerfile`):
 
 ```powershell
-docker run --rm -p 8000:8000 -e MLFLOW_TRACKING_URI=http://host.docker.internal:5000 sp500-direction-api
+docker compose -f docker/docker-compose.yml up --build
 ```
 
 Open:
@@ -450,6 +526,7 @@ Main dependencies used by the final implementation:
 - `pydantic`
 - `great_expectations`
 - `evidently`
+- `streamlit`
 - `pytest`
 
 `requirements.txt` lists exactly these dependencies. Earlier experimentation packages such as `xgboost` and `seaborn` have been removed, since they are not used by the final implemented Kedro model pipeline.

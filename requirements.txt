@@ -12,4 +12,5 @@ uvicorn
 pydantic
 great_expectations
 evidently
+streamlit
 pytest
