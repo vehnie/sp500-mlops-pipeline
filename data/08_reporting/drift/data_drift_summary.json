@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-06-22T16:46:21.165823+00:00",
+  "reference_rows": 4622,
+  "current_rows": 1982,
+  "features": [
+    "simple_return",
+    "log_return",
+    "sma_10",
+    "sma_20",
+    "sma_ratio_10",
+    "rsi_14",
+    "volatility_10",
+    "volume_change"
+  ],
+  "number_of_features": 8,
+  "dataset_drift": true,
+  "drifted_columns_count": 4,
+  "drifted_columns_share": 0.5,
+  "column_drift": {
+    "simple_return": {
+      "drift_detected": false,
+      "drift_score": 0.05736301637702353,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "log_return": {
+      "drift_detected": false,
+      "drift_score": 0.05709040377300191,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "sma_10": {
+      "drift_detected": true,
+      "drift_score": 6.1453912574178045,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "sma_20": {
+      "drift_detected": true,
+      "drift_score": 6.15358575433675,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "sma_ratio_10": {
+      "drift_detected": true,
+      "drift_score": 0.10546153296344712,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "rsi_14": {
+      "drift_detected": true,
+      "drift_score": 0.1734486754776551,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "volatility_10": {
+      "drift_detected": false,
+      "drift_score": 0.07126643124496544,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    },
+    "volume_change": {
+      "drift_detected": false,
+      "drift_score": 0.09698069704512889,
+      "method": "Wasserstein distance (normed)",
+      "threshold": 0.1
+    }
+  }
+}

@@ -1,6 +1,7 @@
 """Great Expectations contracts for raw market and feature datasets."""
 
 from datetime import datetime, timezone
+from html import escape
 from uuid import uuid4
 
 import great_expectations as gx
@@ -163,6 +164,109 @@ def create_feature_validation_report(validation_result) -> dict:
         validation_name=FEATURE_VALIDATION_NAME,
         dataset_name=FEATURE_DATASET_NAME,
     )
+
+
+def create_raw_validation_html_report(report: dict) -> str:
+    """Create a browser-readable HTML report for raw-data validation."""
+    return create_validation_html_report(report)
+
+
+def create_feature_validation_html_report(report: dict) -> str:
+    """Create a browser-readable HTML report for feature-data validation."""
+    return create_validation_html_report(report)
+
+
+def create_validation_html_report(report: dict) -> str:
+    """Transform a compact validation report into a static HTML document."""
+    status_text = "PASS" if report["success"] else "FAIL"
+    status_class = "pass" if report["success"] else "fail"
+    failed_details = report.get("failed_expectation_details", [])
+
+    if failed_details:
+        detail_rows = "\n".join(
+            "<tr>"
+            f"<td>{escape(str(detail.get('expectation_type', '')))}</td>"
+            f"<td>{escape(str(detail.get('column') or ''))}</td>"
+            "</tr>"
+            for detail in failed_details
+        )
+    else:
+        detail_rows = (
+            '<tr><td colspan="2">No failed expectations were reported.</td></tr>'
+        )
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{escape(str(report["dataset_name"]))} validation report</title>
+  <style>
+    body {{
+      color: #1f2933;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      margin: 2rem auto;
+      max-width: 900px;
+    }}
+    h1 {{
+      color: #102a43;
+      margin-bottom: 0.25rem;
+    }}
+    .status {{
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: 700;
+      margin: 1rem 0;
+      padding: 0.35rem 0.7rem;
+    }}
+    .pass {{
+      background: #d9f2e6;
+      color: #0b6b3a;
+    }}
+    .fail {{
+      background: #fde2e2;
+      color: #9b1c1c;
+    }}
+    table {{
+      border-collapse: collapse;
+      margin-top: 1rem;
+      width: 100%;
+    }}
+    th, td {{
+      border: 1px solid #d9e2ec;
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }}
+    th {{
+      background: #f0f4f8;
+      color: #102a43;
+      width: 32%;
+    }}
+  </style>
+</head>
+<body>
+  <h1>Great Expectations Validation Report</h1>
+  <p><strong>Dataset:</strong> {escape(str(report["dataset_name"]))}</p>
+  <p><strong>Validation:</strong> {escape(str(report["validation_name"]))}</p>
+  <div class="status {status_class}">{status_text}</div>
+
+  <h2>Summary</h2>
+  <table>
+    <tr><th>Total expectations</th><td>{escape(str(report["total_expectations"]))}</td></tr>
+    <tr><th>Successful expectations</th><td>{escape(str(report["successful_expectations"]))}</td></tr>
+    <tr><th>Failed expectations</th><td>{escape(str(report["failed_expectations"]))}</td></tr>
+    <tr><th>Validation timestamp</th><td>{escape(str(report["validation_timestamp"]))}</td></tr>
+  </table>
+
+  <h2>Failed Expectation Details</h2>
+  <table>
+    <tr><th>Expectation type</th><th>Column</th></tr>
+    {detail_rows}
+  </table>
+</body>
+</html>
+"""
 
 
 def create_validation_report(

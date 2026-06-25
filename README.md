@@ -1,195 +1,140 @@
 # S&P 500 Market Direction MLOps Pipeline
+
 ### MLOps Project - NOVA IMS 2025/2026
 
-An end-to-end MLOps proof of concept for predicting the next-day market direction of the **S&P 500** using historical OHLCV data from **Yahoo Finance**. The project is organized as a modular, Kedro-style pipeline so each component can run independently or as part of the full workflow.
+This repository contains the final Kedro-based MLOps implementation for predicting the next-day direction of the **S&P 500** from historical OHLCV market data.
 
-> **Dataset:** Yahoo Finance historical S&P 500 index data (`^GSPC`)
-> **Task:** Binary classification: predict whether the next trading day's close is higher than today's close
-> **Main MLOps components:** data quality, feature store, MLflow, model versioning, explainability, serving, containers, drift monitoring, tests
-> **Report limit:** maximum 6 pages
-> **Submission:** report plus zipped code with a runnable sample of data, or Git link, according to course instructions
+The final version is intentionally simple: it focuses on a reproducible pipeline, model tracking, explainability, drift monitoring, testing, and a small serving API. Earlier exploratory ideas are kept only as reference material where useful, but the current Kedro registry is the source of truth for the implemented project.
+
+> **Dataset:** Yahoo Finance historical S&P 500 index data (`^GSPC`)  
+> **Task:** binary classification: predict whether the next trading day's close is higher than today's close  
+> **Main MLOps components:** Kedro, MLflow, SHAP, Evidently, Great Expectations, FastAPI, Docker, pytest
 
 ---
 
 ## Repository Structure
-
-The project follows the organization recommended in the project guidelines and the Kedro-style layout shown in class.
 
 ```text
 sp500-mlops-pipeline/
 |
 +-- conf/
 |   +-- base/
-|   |   +-- catalog.yml              # Dataset locations and artifact definitions
-|   |   +-- parameters.yml           # Global project parameters
-|   |   +-- parameters_data.yml      # Yahoo Finance ticker/date settings
+|   |   +-- catalog.yml              # Dataset locations and artifacts
+|   |   +-- parameters.yml           # Global parameters
+|   |   +-- parameters_data.yml      # Market data settings
 |   |   +-- parameters_model.yml     # Model and MLflow settings
 |   +-- local/
 |       +-- credentials.yml          # Local credentials if needed, gitignored
 |
 +-- data/
-|   +-- 01_raw/                      # Original Yahoo Finance downloads
-|   +-- 02_intermediate/             # Standardized raw data after schema checks
+|   +-- 01_raw/                      # Original Yahoo Finance sample data
+|   +-- 02_intermediate/             # Standardized market data
 |   +-- 03_primary/                  # Cleaned market dataset
-|   +-- 04_feature/                  # Feature store tables
-|   +-- 05_model_input/              # Time-based train/validation/test datasets
-|   +-- 06_models/                   # Serialized models and preprocessors
-|   +-- 07_model_output/             # Predictions, metrics, SHAP values
-|   +-- 08_reporting/                # Figures, reports, drift outputs
+|   +-- 04_feature/                  # Local feature layer
+|   +-- 05_model_input/              # Chronological train/validation/test datasets
+|   +-- 06_models/                   # Serialized local model artifacts
+|   +-- 07_model_output/             # Predictions and metrics
+|   +-- 08_reporting/                # SHAP, drift, validation, MLflow artifacts
 |
 +-- docs/
-|   +-- project_plan.md              # Sprint planning and responsibility tracking
-|   +-- model_card.md                # Final model summary and limitations
-|   +-- production_notes.md          # Production risks and mitigation proposals
+|   +-- model_card.md
+|   +-- production_notes.md
+|   +-- project_plan.md
+|   +-- report_evidence.md
 |
 +-- notebooks/
-|   +-- 01_data_exploration.ipynb    # EDA and dataset motivation (Member 1)
-|   +-- 02_feature_analysis.ipynb    # Feature behavior and leakage checks (Member 2)
-|   +-- 03_model_experiments.ipynb   # Initial modeling and MLflow comparison (Member 3)
-|   +-- 04_evaluation_backtest.ipynb # Metrics, plots, backtesting, SHAP (Member 4)
-|   +-- 05_drift_serving_demo.ipynb  # Drift and serving demo (Member 5)
+|   +-- 00_check_data_ingestion_plot.ipynb
+|   +-- 01_final_project_walkthrough.ipynb
+|   +-- thesis_reference/
+|       +-- 01_market_data_ingestion.ipynb
+|       +-- 03_market_feature_engineering.ipynb
+|       +-- 04_dataset_construction_legacy_sentiment.ipynb
+|       +-- README.md
 |
 +-- src/
 |   +-- sp500_mlops_pipeline/
-|       +-- __init__.py
-|       +-- __main__.py
-|       +-- settings.py
 |       +-- pipeline_registry.py
 |       +-- pipelines/
-|           +-- __init__.py
-|           +-- data_ingestion/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Download Yahoo Finance data
-|           |   +-- pipeline.py
-|           +-- data_quality/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Schema checks, null checks, date checks
-|           |   +-- pipeline.py
-|           +-- data_cleaning/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Sorting, deduplication, adjusted prices
-|           |   +-- pipeline.py
-|           +-- data_feat_engineering/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Returns, volatility, RSI, MACD, target
-|           |   +-- pipeline.py
-|           +-- data_split/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Chronological train/validation/test split
-|           |   +-- pipeline.py
-|           +-- model_selection/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Baselines and candidate comparison
-|           |   +-- pipeline.py
-|           +-- model_train/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Final training, MLflow logging, registry
-|           |   +-- pipeline.py
-|           +-- model_predict/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # Batch and API prediction logic
-|           |   +-- pipeline.py
-|           +-- model_explainability/
-|           |   +-- __init__.py
-|           |   +-- nodes.py         # SHAP values and feature importance
-|           |   +-- pipeline.py
-|           +-- data_drifts/
-|               +-- __init__.py
-|               +-- nodes.py         # Drift reports on features and predictions
-|               +-- pipeline.py
-|
-+-- app/
-|   +-- main.py                      # FastAPI model-serving app
+|       |   +-- data_cleaning/
+|       |   +-- data_drift/
+|       |   +-- data_expectations/
+|       |   +-- data_feat_engineering/
+|       |   +-- data_quality/
+|       |   +-- data_split/
+|       |   +-- model_explainability/
+|       |   +-- model_predict/
+|       |   +-- model_predict_challenger/
+|       |   +-- model_train/
+|       |   +-- model_train_challenger/
+|       +-- serving/
+|           +-- app.py
+|           +-- model_loader.py
+|           +-- schemas.py
 |
 +-- docker/
-|   +-- Dockerfile                   # Container for pipeline/API execution
-|   +-- docker-compose.yml           # Optional API + MLflow stack
+|   +-- Dockerfile
+|   +-- docker-compose.yml
 |
 +-- tests/
-|   +-- test_data_quality.py
-|   +-- test_feature_engineering.py
-|   +-- test_data_split.py
-|   +-- test_model_train.py
-|   +-- test_api.py
+|   +-- test_*.py
 |
-+-- report/
-|   +-- report.pdf                   # Final report, maximum 6 pages
-|
++-- Dockerfile
 +-- requirements.txt
 +-- pyproject.toml
 +-- README.md
-+-- LICENSE
-+-- .gitignore
 ```
 
-> **Versioning note:** Generated data, MLflow runs, serialized models, and local credentials should not be committed. The small Yahoo Finance raw CSV in `data/01_raw/` is kept as the runnable sample required by the project guidelines.
-
----
-
-## Team & Responsibilities
-
-| Member | Role | Primary Responsibilities |
-|--------|------|--------------------------|
-| **Member 1** | Project Lead & Data Engineer | Repo setup, Kedro structure, Yahoo Finance ingestion, raw data sample, project planning, final packaging |
-| **Member 2** | Data Quality & Feature Store Lead | Data tests, schema validation, feature engineering, feature store layer, leakage prevention |
-| **Member 3** | Modeling & MLflow Lead | Baseline models, model selection, hyperparameter tuning, MLflow tracking, model versioning |
-| **Member 4** | Evaluation & Explainability Lead | Metrics, plots, backtesting, SHAP, feature importance, model comparison conclusions |
-| **Member 5** | Serving, Drift & Report Lead | FastAPI serving, Docker, drift evaluation, production discussion, final 6-page report integration |
-
----
-
-## Sprint Timeline
-
-| Sprint | Dates | Milestones | Owner(s) |
-|--------|-------|------------|----------|
-| **Sprint 1** | May 7-13, 2026 | Kedro-style repo structure, `conf/`, data catalog draft, Yahoo Finance ingestion, initial EDA | M1 |
-| **Sprint 2** | May 14-20, 2026 | Data quality pipeline, cleaned primary dataset, feature store pipeline, leakage-safe target | M1, M2 |
-| **Sprint 3** | May 21-27, 2026 | Time-based split, baseline models, MLflow experiment tracking, first model comparison | M2, M3 |
-| **Sprint 4** | May 28-Jun 3, 2026 | Tuned candidate models, final training pipeline, metrics, SHAP, evaluation figures | M3, M4 |
-| **Sprint 5** | Jun 4-10, 2026 | FastAPI serving, Docker container, drift evaluation, tests for relevant pipelines | M5 |
-| **Sprint 6** | Jun 11-17, 2026 | Final report, production risk discussion, reproducibility run, submission package | All |
-| **Deadline** | TBD | Submit report plus code/sample data or Git link | M1, M5 |
+The notebooks under `notebooks/thesis_reference/` are legacy reference notebooks. They are not used as the source of truth for the final implementation.
 
 ---
 
 ## Pipeline Design
 
-Each pipeline should be executable separately or as part of the full sequence.
+The project is organized into modular Kedro pipelines. The current registry exposes these pipelines:
 
 ```text
-data_ingestion
-  -> data_quality
+__default__
+data_cleaning
+data_drift
+data_expectations
+data_feat_engineering
+data_quality
+data_split
+model_explainability
+model_predict
+model_predict_challenger
+model_train
+model_train_challenger
+```
+
+The core/default workflow is:
+
+```text
+data_quality
   -> data_cleaning
   -> data_feat_engineering
   -> data_split
-  -> model_selection
   -> model_train
+  -> model_train_challenger
   -> model_predict
-  -> model_explainability
-  -> data_drifts
+  -> model_predict_challenger
 ```
 
-Examples of separate runs:
+Additional reporting and monitoring pipelines are run separately when needed:
 
-```bash
-kedro run --pipeline=data_quality
-kedro run --pipeline=model_train
-kedro run --pipeline=data_drifts
-```
+- `data_expectations`
+- `model_explainability`
+- `data_drift`
 
-Full reproducibility run:
-
-```bash
-kedro run
-```
+This keeps the default run focused on producing the feature data, splits, trained models, and predictions. The reporting pipelines generate extra validation, SHAP, and drift artifacts for analysis and the final report.
 
 ---
 
 ## Data & Target Definition
 
-The source data comes from Yahoo Finance for the S&P 500 index ticker `^GSPC`.
+The source data is historical S&P 500 index data from Yahoo Finance using ticker `^GSPC`.
 
-Required columns:
+Required market columns:
 
 - `Date`
 - `Open`
@@ -199,159 +144,163 @@ Required columns:
 - `Adj Close`
 - `Volume`
 
-`Close` is the official price source for all price-derived features, returns, technical indicators, future returns, and targets; `Adj Close` is retained in the raw and cleaned schemas but is not used for feature engineering or label creation.
-
-Default target:
+The target is:
 
 ```text
 target_next_day_up = 1 if Close[t + 1] > Close[t] else 0
 ```
 
-Time-series rules:
-
-- Do not shuffle the dataset before splitting.
-- Use only past and current data to create features.
-- Shift the target forward by one trading day.
-- Keep the final test period untouched until final evaluation.
-- Document every split date in MLflow and in the report.
+Because this is time series data, the train/validation/test split is chronological. The project does not shuffle the rows before splitting, since that would leak future market information into training.
 
 ---
 
-## Feature Store
+## Feature Layer
 
-The `data_feat_engineering` pipeline writes reusable model features to `data/04_feature/`.
+The implemented project uses a local feature layer stored under:
 
-Candidate features:
+```text
+data/04_feature/
+```
 
-- Daily returns and log returns
-- Lagged returns over recent trading days
-- Rolling mean returns over 5, 10, 20, and 60 trading days
-- Rolling volatility over 5, 10, 20, and 60 trading days
-- Moving average ratios, such as `Close / SMA_20`
-- Momentum indicators, such as RSI and MACD
-- Volume change and rolling volume averages
-- Calendar features, such as month, quarter, and day of week
+The main feature dataset is:
 
-Feature tests should verify:
+```text
+data/04_feature/sp500_feature_data.csv
+```
 
-- No unexpected nulls after preprocessing
-- No duplicated dates
-- Chronological ordering
-- Target values are only `0` or `1`
-- Feature columns do not use future information
-- Train, validation, and test periods do not overlap
+The final production features used by the implemented model pipelines are:
+
+- `simple_return`
+- `log_return`
+- `sma_10`
+- `sma_20`
+- `sma_ratio_10`
+- `rsi_14`
+- `volatility_10`
+- `volume_change`
+
+Earlier in the project, broader feature ideas such as MACD, calendar variables, lagged returns, and longer rolling windows were considered. They are not part of the final implemented model pipeline. I kept the final feature set smaller so the model and explanations stayed easier to validate for the report.
 
 ---
 
 ## Models
 
-### Baselines
+The final implementation compares two models:
 
-Baseline models establish whether the pipeline is working and provide a minimum benchmark:
+- **Logistic Regression** — baseline and selected champion model
+- **Random Forest** — challenger model
 
-- Majority-class classifier
-- Previous-day direction classifier
-- Logistic Regression
-- Decision Tree
+The Logistic Regression model is trained in the `model_train` pipeline. The Random Forest challenger is trained in the `model_train_challenger` pipeline.
 
-### Candidate Models
+Other candidates such as XGBoost, LightGBM, Support Vector Machines, and shallow neural networks were planning-stage ideas. They are not part of the final implemented Kedro model workflow and should be treated as future work rather than current project output.
 
-Final candidates for model selection:
+---
 
-- Random Forest
-- XGBoost or LightGBM
-- Support Vector Machine
-- Optional shallow neural network if time permits
+## Final Results
 
-### MLflow Tracking
+The final test results are:
 
-Every experiment should log:
+### Logistic Regression
 
-- Model name and version
-- Feature set version
-- Train, validation, and test date ranges
-- Hyperparameters
-- Accuracy, F1-score, ROC-AUC, precision, recall
-- Confusion matrix
-- Feature importance or SHAP plots
-- Serialized model artifact
+| Metric | Value |
+|---|---:|
+| Accuracy | 0.5363 |
+| Precision | 0.5422 |
+| Recall | 0.9218 |
+| F1-score | 0.6828 |
+| ROC-AUC | 0.4991 |
+
+### Random Forest
+
+| Metric | Value |
+|---|---:|
+| Accuracy | 0.5030 |
+| Precision | 0.5474 |
+| Recall | 0.4730 |
+| F1-score | 0.5075 |
+| ROC-AUC | 0.5020 |
+
+Logistic Regression was selected as the champion model because it achieved better accuracy, recall, and F1-score while staying simpler and more interpretable.
+
+At the same time, both models have ROC-AUC values close to 0.50. That is an important limitation: the current feature signal is weak, and the result should be interpreted as an MLOps implementation success more than a strong market-prediction model.
+
+---
+
+## MLflow Tracking and Registry
+
+Experiments are tracked with MLflow. The champion model is registered as:
+
+```text
+sp500_direction_model
+```
+
+The serving code loads the model using the registry alias:
+
+```text
+candidate_champion
+```
+
+MLflow is used to keep model versions, metrics, parameters, and artifacts connected to the pipeline runs. This makes the API and the reporting artifacts easier to trace back to the run that produced them.
 
 ---
 
 ## Evaluation & Explainability
 
-The final report should include results and conclusions from both exploration and modeling.
+The `model_explainability` pipeline generates SHAP artifacts for the champion Logistic Regression model.
 
-Evaluation outputs:
+Main outputs:
 
-- Accuracy
-- F1-score
-- Precision and recall
-- ROC-AUC
-- Confusion matrix
-- Walk-forward or time-window validation
-- Baseline comparison
-- Optional simple trading simulation, such as cumulative return and max drawdown
+```text
+data/08_reporting/shap/logistic_regression_v2_summary_plot.png
+data/08_reporting/shap/logistic_regression_v2_feature_importance_bar.png
+data/08_reporting/shap/logistic_regression_v2_explainability_summary.json
+```
 
-Explainability outputs:
-
-- Feature importance
-- SHAP summary plot
-- Short interpretation of the strongest drivers
-- Known model limitations
-
-All reporting artifacts should be saved under `data/08_reporting/`.
+SHAP is used here to understand how the final input features contribute to model predictions. This is especially useful because the model is simple enough to inspect, but the feature effects still benefit from a consistent explanation method.
 
 ---
 
-## Serving & Containers
+## Drift Monitoring
 
-The serving component should expose a small FastAPI application.
+The implemented Evidently drift pipeline is named:
 
-Required endpoints:
+```text
+data_drift
+```
+
+It compares:
+
+- reference data = oldest 70%
+- current data = newest 30%
+
+The generated outputs are:
+
+```text
+data/08_reporting/drift/data_drift_report.html
+data/08_reporting/drift/data_drift_summary.json
+```
+
+The drift report is part of the monitoring layer. It does not automatically retrain the model, but it gives a concrete signal about whether the feature distributions seen by the model have changed over time.
+
+---
+
+## Serving & Docker
+
+The serving component uses FastAPI and loads the registered MLflow model.
+
+Available endpoints:
 
 - `GET /health`
-- `POST /predict`
 - `GET /model-info`
+- `POST /predict`
 
-The prediction response should include:
+The Docker image used for the API is:
 
-- Predicted class
-- Probability score
-- Model version
-- Feature timestamp
+```text
+sp500-direction-api
+```
 
-The Docker setup should allow another user to run the API without manually rebuilding the environment.
-
----
-
-## Drift Evaluation
-
-The `data_drifts` pipeline should compare a reference dataset against a newer sample.
-
-Recommended checks:
-
-- Missing value changes
-- Feature distribution drift
-- Prediction distribution drift
-- Target/performance drift when labels are available
-- Drift report saved to `data/08_reporting/`
-
-For the proof of concept, a synthetic drift scenario can be created by perturbing a sample of the data and showing how the monitoring report changes.
-
----
-
-## Report Structure
-
-The final report must be at most 6 pages and should cover:
-
-1. Dataset choice, business/technical objective, and success metrics
-2. Project planning and sprint organization
-3. Data exploration results
-4. Modeling results, metrics, feature importance, and SHAP explanations
-5. MLOps implementation: pipeline orchestration, MLflow, tests, serving, containers, drift
-6. Production discussion: advantages of chosen technologies, risks, limitations, and mitigations
-7. Package list and versions used
+The API is intentionally small: it mainly validates the input features, loads the selected model from MLflow, and returns the predicted class and probability.
 
 ---
 
@@ -367,15 +316,13 @@ pip install -r requirements.txt
 
 ### 2. Configure data source
 
-Set the Yahoo Finance ticker and date range in `conf/base/parameters_data.yml`:
+The market data settings are stored in:
 
-```yaml
-ticker: "^GSPC"
-start_date: "2000-01-01"
-end_date: "2026-05-07"
+```text
+conf/base/parameters_data.yml
 ```
 
-### 3. Run the full pipeline
+### 3. Run the full default workflow
 
 ```bash
 kedro run
@@ -384,31 +331,21 @@ kedro run
 ### 4. Run selected pipelines
 
 ```bash
-kedro run --pipeline=data_ingestion
-kedro run --pipeline=model_selection
-kedro run --pipeline=data_drifts
+kedro run --pipeline=data_quality
+kedro run --pipeline=data_feat_engineering
+kedro run --pipeline=model_train
+kedro run --pipeline=model_train_challenger
+kedro run --pipeline=model_explainability
+kedro run --pipeline=data_drift
 ```
 
-### 5. Serve the candidate-champion model
+### 5. Serve the candidate-champion model locally
 
 Activate the project environment:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
-
-The MLflow server must proxy artifacts instead of returning Windows-local
-`file:///C:/...` paths to clients. If this project database was created before
-artifact proxying was enabled, stop MLflow and run this one-time, idempotent
-migration from the repository root:
-
-```powershell
-python .\scripts\migrate_mlflow_artifact_uris.py
-```
-
-The migration changes only artifact-location metadata, creates
-`mlflow.db.before-artifact-proxy.bak`, and does not modify model files, runs,
-metrics, registered versions, or aliases.
 
 Start the local MLflow Tracking Server and Model Registry:
 
@@ -436,16 +373,13 @@ Open the automatic API documentation:
 http://127.0.0.1:8000/docs
 ```
 
-### 6. Run the local MLOps dashboard
-
-Ensure Streamlit is installed in the active environment, then run:
+### 6. Run the local dashboard
 
 ```powershell
 streamlit run streamlit_app.py
 ```
 
-The dashboard is read-only and uses the existing Great Expectations reports,
-model metrics, predictions, and SHAP explainability artefacts under `data/`.
+The dashboard is read-only and uses existing artifacts from `data/`.
 
 ### 7. Run the FastAPI application with Docker
 
@@ -466,15 +400,6 @@ mlflow server --host 0.0.0.0 --port 5000 `
   --artifacts-destination $artifactUri
 ```
 
-Run the one-time URI migration shown in step 5 before this command if the
-database still contains `file:///C:/...` artifact locations. With this setup,
-the Registry returns `mlflow-artifacts:/...` locations and the container
-downloads the selected model through the MLflow HTTP server.
-
-The explicit `file:///...` URI is important on Windows: passing a raw
-`C:\...` path makes MLflow interpret the drive letter as an artifact-store
-scheme.
-
 Build the API image:
 
 ```powershell
@@ -487,67 +412,30 @@ Run the container:
 docker run --rm -p 8000:8000 -e MLFLOW_TRACKING_URI=http://host.docker.internal:5000 sp500-direction-api
 ```
 
-Open the API documentation and health endpoint:
+Open:
 
 ```text
 http://127.0.0.1:8000/docs
 http://127.0.0.1:8000/health
 ```
 
-Stop the foreground container with `Ctrl+C`. If it was started with `-d`, use:
-
-```powershell
-docker stop <container-id-or-name>
-```
-
 ---
 
-## Git Workflow
+## Validation Status
 
-1. Each member works on a dedicated branch: `feature/<topic>`.
-2. Open a Pull Request into `main` when a milestone is complete.
-3. Member 1 reviews structure, reproducibility, and merge conflicts.
-4. At least one technical owner reviews modeling, serving, and monitoring PRs.
-5. Commit messages follow the format: `[M3] Add MLflow logging to XGBoost training`.
-
-Suggested branches:
+The final local validation completed with:
 
 ```text
-feature/kedro-structure
-feature/data-quality
-feature/feature-store
-feature/model-selection
-feature/model-serving
-feature/drift-monitoring
-feature/report
+81 passed, 11 warnings
 ```
 
----
-
-## Submission Checklist
-
-- [ ] Maximum 6-page report exported to `report/report.pdf`
-- [ ] Project planning included in the report
-- [ ] Code organized in modular Kedro-style pipelines
-- [ ] Yahoo Finance sample data included or easy to regenerate
-- [ ] Data quality tests implemented
-- [ ] Feature store layer implemented
-- [ ] MLflow experiment tracking and model versioning included
-- [ ] Main metrics and explainability artifacts saved
-- [ ] SHAP or feature importance included in the report
-- [ ] Model serving implemented with FastAPI
-- [ ] Docker container builds and runs
-- [x] Data drift evaluation implemented
-- [ ] Unit tests for relevant functions and pipelines pass
-- [ ] Requirements/package versions listed
-- [ ] Another user can run the pipeline and reproduce the results
-- [ ] Final zip or Git link prepared according to course instructions
+The full `kedro run` also completed successfully, and Kedro-Viz was used to inspect the pipeline graph.
 
 ---
 
 ## Requirements
 
-Key dependencies to include in `requirements.txt`:
+Main dependencies used by the final implementation:
 
 - `kedro`
 - `kedro-datasets`
@@ -555,9 +443,7 @@ Key dependencies to include in `requirements.txt`:
 - `pandas`
 - `numpy`
 - `scikit-learn`
-- `xgboost`
 - `matplotlib`
-- `seaborn`
 - `mlflow`
 - `shap`
 - `fastapi`
@@ -566,6 +452,8 @@ Key dependencies to include in `requirements.txt`:
 - `great_expectations`
 - `evidently`
 - `pytest`
+
+`requirements.txt` may still include `xgboost` and `seaborn` from earlier experimentation, but they are not used by the final implemented Kedro model pipeline.
 
 ---
 

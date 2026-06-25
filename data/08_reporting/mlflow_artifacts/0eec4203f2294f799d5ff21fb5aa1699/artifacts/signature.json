@@ -1,0 +1,5 @@
+{
+  "inputs": "[{\"type\": \"double\", \"name\": \"simple_return\", \"required\": true}, {\"type\": \"double\", \"name\": \"log_return\", \"required\": true}, {\"type\": \"double\", \"name\": \"sma_10\", \"required\": true}, {\"type\": \"double\", \"name\": \"sma_20\", \"required\": true}, {\"type\": \"double\", \"name\": \"sma_ratio_10\", \"required\": true}, {\"type\": \"double\", \"name\": \"rsi_14\", \"required\": true}, {\"type\": \"double\", \"name\": \"volatility_10\", \"required\": true}, {\"type\": \"double\", \"name\": \"volume_change\", \"required\": true}]",
+  "outputs": "[{\"type\": \"tensor\", \"tensor-spec\": {\"dtype\": \"int64\", \"shape\": [-1]}}]",
+  "params": null
+}

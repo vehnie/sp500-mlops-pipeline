@@ -1,0 +1,11 @@
+{
+  "validation_name": "feature_dataset_contract",
+  "success": true,
+  "total_expectations": 27,
+  "successful_expectations": 27,
+  "failed_expectations": 0,
+  "failed_expectation_types": [],
+  "failed_expectation_details": [],
+  "validation_timestamp": "2026-06-25T10:32:22.151796+00:00",
+  "dataset_name": "sp500_feature_data"
+}

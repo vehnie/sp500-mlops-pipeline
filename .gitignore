@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest_tmp/
 .mypy_cache/
 .ruff_cache/
 
@@ -56,3 +57,11 @@ models/
 
 # Playground
 playground/
+
+# Local test temp
+.temp_pytest_antonio/
+STATUS_22JUN_FINAL.txt
+
+# MLflow local store
+mlflow.db
+data/08_reporting/mlflow_artifacts/

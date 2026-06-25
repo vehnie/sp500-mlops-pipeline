@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>sp500_yahoo_finance_raw validation report</title>
+  <style>
+    body {
+      color: #1f2933;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      margin: 2rem auto;
+      max-width: 900px;
+    }
+    h1 {
+      color: #102a43;
+      margin-bottom: 0.25rem;
+    }
+    .status {
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: 700;
+      margin: 1rem 0;
+      padding: 0.35rem 0.7rem;
+    }
+    .pass {
+      background: #d9f2e6;
+      color: #0b6b3a;
+    }
+    .fail {
+      background: #fde2e2;
+      color: #9b1c1c;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 1rem;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #d9e2ec;
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f0f4f8;
+      color: #102a43;
+      width: 32%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Great Expectations Validation Report</h1>
+  <p><strong>Dataset:</strong> sp500_yahoo_finance_raw</p>
+  <p><strong>Validation:</strong> raw_market_data_contract</p>
+  <div class="status pass">PASS</div>
+
+  <h2>Summary</h2>
+  <table>
+    <tr><th>Total expectations</th><td>19</td></tr>
+    <tr><th>Successful expectations</th><td>19</td></tr>
+    <tr><th>Failed expectations</th><td>0</td></tr>
+    <tr><th>Validation timestamp</th><td>2026-06-25T10:32:22.162941+00:00</td></tr>
+  </table>
+
+  <h2>Failed Expectation Details</h2>
+  <table>
+    <tr><th>Expectation type</th><th>Column</th></tr>
+    <tr><td colspan="2">No failed expectations were reported.</td></tr>
+  </table>
+</body>
+</html>
