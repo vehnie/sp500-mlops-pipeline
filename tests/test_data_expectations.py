@@ -8,8 +8,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from sp500_mlops_pipeline.pipelines.data_expectations.nodes import (
+    create_feature_validation_html_report,
     create_feature_validation_report,
+    create_raw_validation_html_report,
     create_raw_validation_report,
+    create_validation_html_report,
     enforce_validation_contracts,
     validate_feature_data_expectations,
     validate_raw_market_data_expectations,
@@ -135,3 +138,66 @@ def test_validation_reports_have_expected_keys() -> None:
 
     assert set(raw_report) == EXPECTED_REPORT_KEYS
     assert set(feature_report) == EXPECTED_REPORT_KEYS
+
+
+def test_raw_validation_html_report_contains_summary_fields() -> None:
+    report = create_raw_validation_report(
+        validate_raw_market_data_expectations(make_valid_raw_data())
+    )
+
+    html = create_raw_validation_html_report(report)
+
+    assert "<!doctype html>" in html
+    assert "sp500_yahoo_finance_raw" in html
+    assert "raw_market_data_contract" in html
+    assert "PASS" in html
+    assert "Total expectations" in html
+    assert str(report["total_expectations"]) in html
+    assert "Successful expectations" in html
+    assert str(report["successful_expectations"]) in html
+    assert "Failed expectations" in html
+    assert str(report["failed_expectations"]) in html
+    assert "Validation timestamp" in html
+    assert report["validation_timestamp"] in html
+    assert "No failed expectations were reported." in html
+
+
+def test_feature_validation_html_report_contains_failure_details() -> None:
+    data = make_valid_feature_data()
+    data.loc[0, TARGET_COLUMN] = 2
+    report = create_feature_validation_report(
+        validate_feature_data_expectations(data)
+    )
+
+    html = create_feature_validation_html_report(report)
+
+    assert "sp500_feature_data" in html
+    assert "feature_dataset_contract" in html
+    assert "FAIL" in html
+    assert "expect_column_values_to_be_in_set" in html
+    assert TARGET_COLUMN in html
+
+
+def test_validation_html_report_escapes_report_values() -> None:
+    report = {
+        "validation_name": "<script>alert('validation')</script>",
+        "success": False,
+        "total_expectations": 1,
+        "successful_expectations": 0,
+        "failed_expectations": 1,
+        "failed_expectation_types": ["bad"],
+        "failed_expectation_details": [
+            {
+                "expectation_type": "<script>alert('expectation')</script>",
+                "column": "Close<script>",
+            }
+        ],
+        "validation_timestamp": "2026-01-01T00:00:00+00:00",
+        "dataset_name": "<script>alert('dataset')</script>",
+    }
+
+    html = create_validation_html_report(report)
+
+    assert "<script>" not in html
+    assert "&lt;script&gt;alert(&#x27;dataset&#x27;)&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;expectation&#x27;)&lt;/script&gt;" in html
