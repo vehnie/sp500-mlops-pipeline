@@ -360,6 +360,11 @@ directly, so you can skip this step unless you want to regenerate the extract.
 
 ### Step 5 — Run the full pipeline
 
+> **Start MLflow first.** The `model_train` and `model_train_challenger`
+> pipelines log runs to the MLflow tracking server at `http://127.0.0.1:5000`,
+> so it must be running **before** `kedro run`. Open a separate terminal and
+> start it with the MLflow command from [Step 9, Terminal A](#step-9--serve-the-champion-model-mlflow--fastapi), then run:
+
 ```powershell
 kedro run
 ```
