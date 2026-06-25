@@ -30,6 +30,9 @@ mlflow.db
 mlflow.db.*
 *.db.bak
 
+# Logs (e.g. mlflow-server stdout/stderr)
+*.log
+
 # Jupyter
 .ipynb_checkpoints/
 

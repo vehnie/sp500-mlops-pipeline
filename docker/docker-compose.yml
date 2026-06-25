@@ -1,0 +1,22 @@
+# Compose file for the S&P 500 direction serving API.
+#
+# Builds the API image from the project root Dockerfile and runs it. The API
+# loads the champion model from an MLflow Tracking Server that you run on the
+# host (see the README "Serving & Docker" section), reachable from the
+# container at host.docker.internal:5000.
+#
+# Usage (from the repository root):
+#   docker compose -f docker/docker-compose.yml up --build
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: sp500-direction-api
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_TRACKING_URI: "http://host.docker.internal:5000"
+    extra_hosts:
+      # Lets the container reach a host-run MLflow server on Linux too.
+      - "host.docker.internal:host-gateway"

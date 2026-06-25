@@ -1,0 +1,14 @@
+# Market data source settings.
+#
+# The project ships with a ready-to-use sample extract at
+# data/01_raw/sp500_yahoo_finance_raw.csv. These settings document the
+# provenance of that sample: the Yahoo Finance ticker and the date range it
+# was downloaded for. The default Kedro workflow consumes the committed CSV
+# directly (see the `sp500_yahoo_finance_raw` entry in catalog.yml), so these
+# values are reference metadata for regenerating the extract if needed.
+market_data:
+  ticker: "^GSPC"          # Yahoo Finance S&P 500 index ticker
+  start_date: "2000-01-01"
+  end_date: "2026-05-06"
+  interval: "1d"           # daily OHLCV bars
+  raw_data_path: data/01_raw/sp500_yahoo_finance_raw.csv

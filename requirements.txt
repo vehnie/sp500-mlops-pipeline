@@ -4,9 +4,7 @@ yfinance
 pandas
 numpy
 scikit-learn
-xgboost
 matplotlib
-seaborn
 mlflow
 shap
 fastapi

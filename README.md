@@ -72,13 +72,12 @@ sp500-mlops-pipeline/
 |           +-- schemas.py
 |
 +-- docker/
-|   +-- Dockerfile
-|   +-- docker-compose.yml
+|   +-- docker-compose.yml          # Builds/runs the serving API via the root Dockerfile
 |
 +-- tests/
 |   +-- test_*.py
 |
-+-- Dockerfile
++-- Dockerfile                       # Serving API image (used by docker build and compose)
 +-- requirements.txt
 +-- pyproject.toml
 +-- README.md
@@ -426,7 +425,7 @@ http://127.0.0.1:8000/health
 The final local validation completed with:
 
 ```text
-81 passed, 11 warnings
+80 passed, 11 warnings
 ```
 
 The full `kedro run` also completed successfully, and Kedro-Viz was used to inspect the pipeline graph.
@@ -453,7 +452,7 @@ Main dependencies used by the final implementation:
 - `evidently`
 - `pytest`
 
-`requirements.txt` may still include `xgboost` and `seaborn` from earlier experimentation, but they are not used by the final implemented Kedro model pipeline.
+`requirements.txt` lists exactly these dependencies. Earlier experimentation packages such as `xgboost` and `seaborn` have been removed, since they are not used by the final implemented Kedro model pipeline.
 
 ---
 
