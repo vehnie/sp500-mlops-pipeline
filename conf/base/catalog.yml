@@ -96,6 +96,26 @@ random_forest_prediction_overlay_plot:
   filepath: data/08_reporting/plots/random_forest_prediction_overlay.png
   overwrite: true
 
+roc_curves_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/roc_curves.png
+  overwrite: true
+
+confusion_matrices_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/confusion_matrices.png
+  overwrite: true
+
+model_comparison_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/model_comparison.png
+  overwrite: true
+
+probability_distribution_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/probability_distribution.png
+  overwrite: true
+
 raw_data_validation_report:
   type: json.JSONDataset
   filepath: data/08_reporting/great_expectations/raw_data_validation_report.json
