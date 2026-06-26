@@ -20,8 +20,15 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from sp500_mlops_pipeline.pipelines.mlflow_utils import (
+    active_or_new_mlflow_run,
+    prefix_keys,
+)
+
 
 logger = logging.getLogger(__name__)
+
+MLFLOW_STAGE = "baseline_training"
 
 
 def train_and_evaluate_baseline_model(
@@ -66,7 +73,7 @@ def train_and_evaluate_baseline_model(
         experiment_id = experiment.experiment_id
 
     mlflow.set_experiment(experiment_id=experiment_id)
-    with redirect_stdout(io.StringIO()), mlflow.start_run(
+    with redirect_stdout(io.StringIO()), active_or_new_mlflow_run(
         run_name=mlflow_parameters["run_name"]
     ) as run:
         model.fit(X_train, train_target)
@@ -84,24 +91,35 @@ def train_and_evaluate_baseline_model(
         }
 
         mlflow.log_params(
-            {
-                "model_type": model_parameters["model_type"],
-                "random_state": model_parameters["random_state"],
-                "max_iter": model_parameters["max_iter"],
-            }
+            prefix_keys(
+                {
+                    "model_type": model_parameters["model_type"],
+                    "random_state": model_parameters["random_state"],
+                    "max_iter": model_parameters["max_iter"],
+                },
+                MLFLOW_STAGE,
+            )
         )
-        mlflow.log_metrics(metrics)
+        mlflow.log_metrics(prefix_keys(metrics, MLFLOW_STAGE))
         mlflow.set_tags(
-            {
+            prefix_keys(
+                {
+                    "dataset": "sp500_feature_data",
+                    "split_strategy": "chronological_70_15_15",
+                    "model_family": "logistic_regression",
+                    "pipeline_stage": MLFLOW_STAGE,
+                },
+                MLFLOW_STAGE,
+            )
+            | {
                 "dataset": "sp500_feature_data",
                 "split_strategy": "chronological_70_15_15",
-                "model_family": "logistic_regression",
-                "pipeline_stage": "baseline_training",
+                "baseline_model_family": "logistic_regression",
             }
         )
         mlflow.log_dict(
             {"features": X_train.columns.tolist()},
-            "feature_columns.json",
+            f"{MLFLOW_STAGE}/feature_columns.json",
         )
 
         input_example = X_train.head(5)

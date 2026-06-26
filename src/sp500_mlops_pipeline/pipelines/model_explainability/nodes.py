@@ -17,6 +17,11 @@ import pandas as pd
 import shap
 from sklearn.pipeline import Pipeline
 
+from sp500_mlops_pipeline.pipelines.mlflow_utils import (
+    active_or_new_mlflow_run,
+    prefix_keys,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +29,7 @@ MODEL_NAME = "sp500_direction_model"
 MODEL_VERSION = "1"
 MODEL_ALIAS = "candidate_champion"
 RUN_NAME = "logistic_regression_v2_shap_explainability"
+MLFLOW_STAGE = "baseline_explainability"
 
 
 def create_logistic_regression_shap_explanation(
@@ -153,46 +159,57 @@ def _log_explainability_run(
         experiment_id = experiment.experiment_id
 
     mlflow.set_experiment(experiment_id=experiment_id)
-    with redirect_stdout(io.StringIO()), mlflow.start_run(run_name=RUN_NAME) as run:
+    with redirect_stdout(io.StringIO()), active_or_new_mlflow_run(
+        run_name=RUN_NAME
+    ) as run:
         mlflow.set_tags(
-            {
-                "model_name": MODEL_NAME,
-                "model_version": MODEL_VERSION,
-                "model_alias": MODEL_ALIAS,
-                "model_family": "logistic_regression",
-                "pipeline_stage": "explainability",
-                "explained_dataset": "validation",
-            }
+            prefix_keys(
+                {
+                    "model_name": MODEL_NAME,
+                    "model_version": MODEL_VERSION,
+                    "model_alias": MODEL_ALIAS,
+                    "model_family": "logistic_regression",
+                    "pipeline_stage": "explainability",
+                    "explained_dataset": "validation",
+                },
+                MLFLOW_STAGE,
+            )
         )
         mlflow.log_text(
             importance.to_csv(index=False),
-            "logistic_regression_v2_global_feature_importance.csv",
+            f"{MLFLOW_STAGE}/logistic_regression_v2_global_feature_importance.csv",
         )
         mlflow.log_figure(
             summary_figure,
-            "logistic_regression_v2_summary_plot.png",
+            f"{MLFLOW_STAGE}/logistic_regression_v2_summary_plot.png",
         )
         mlflow.log_figure(
             importance_figure,
-            "logistic_regression_v2_feature_importance_bar.png",
+            f"{MLFLOW_STAGE}/logistic_regression_v2_feature_importance_bar.png",
         )
         mlflow.log_dict(
             summary,
-            "logistic_regression_v2_explainability_summary.json",
+            f"{MLFLOW_STAGE}/logistic_regression_v2_explainability_summary.json",
         )
         mlflow.log_params(
-            {
-                f"rank_{row.rank}_feature": row.feature
-                for row in importance.head(5).itertuples()
-            }
+            prefix_keys(
+                {
+                    f"rank_{row.rank}_feature": row.feature
+                    for row in importance.head(5).itertuples()
+                },
+                MLFLOW_STAGE,
+            )
         )
         mlflow.log_metrics(
-            {
-                f"rank_{row.rank}_mean_abs_shap": float(
-                    row.mean_abs_shap_value
-                )
-                for row in importance.head(5).itertuples()
-            }
+            prefix_keys(
+                {
+                    f"rank_{row.rank}_mean_abs_shap": float(
+                        row.mean_abs_shap_value
+                    )
+                    for row in importance.head(5).itertuples()
+                },
+                MLFLOW_STAGE,
+            )
         )
         logger.info(
             "MLflow SHAP run created: experiment=%s, run_id=%s",

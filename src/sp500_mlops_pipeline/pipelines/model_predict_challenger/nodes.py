@@ -17,10 +17,16 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from sp500_mlops_pipeline.pipelines.mlflow_utils import (
+    active_or_new_mlflow_run,
+    prefix_keys,
+)
+
 
 logger = logging.getLogger(__name__)
 
 RUN_NAME = "random_forest_challenger_test_evaluation_v2"
+MLFLOW_STAGE = "challenger_test_evaluation"
 
 
 def evaluate_challenger_model(
@@ -96,33 +102,38 @@ def _log_test_evaluation(
     )
 
     mlflow.set_experiment(experiment_id=experiment_id)
-    with redirect_stdout(io.StringIO()), mlflow.start_run(run_name=RUN_NAME) as run:
-        mlflow.log_metrics(test_metrics)
+    with redirect_stdout(io.StringIO()), active_or_new_mlflow_run(
+        run_name=RUN_NAME
+    ) as run:
+        mlflow.log_metrics(prefix_keys(test_metrics, MLFLOW_STAGE))
         mlflow.set_tags(
-            {
-                "dataset": "sp500_feature_data",
-                "split_strategy": "chronological_70_15_15",
-                "model_family": "random_forest",
-                "model_role": "challenger",
-                "pipeline_stage": "final_test_evaluation",
-                "evaluation_dataset": "test",
-            }
+            prefix_keys(
+                {
+                    "dataset": "sp500_feature_data",
+                    "split_strategy": "chronological_70_15_15",
+                    "model_family": "random_forest",
+                    "model_role": "challenger",
+                    "pipeline_stage": "final_test_evaluation",
+                    "evaluation_dataset": "test",
+                },
+                MLFLOW_STAGE,
+            )
         )
         mlflow.log_dict(
             test_metrics,
-            "random_forest_test_metrics.json",
+            f"{MLFLOW_STAGE}/random_forest_test_metrics.json",
         )
         mlflow.log_text(
             test_predictions.to_csv(index=False),
-            "random_forest_test_predictions.csv",
+            f"{MLFLOW_STAGE}/random_forest_test_predictions.csv",
         )
         mlflow.log_text(
             input_example.to_csv(index=False),
-            "input_example.csv",
+            f"{MLFLOW_STAGE}/input_example.csv",
         )
         mlflow.log_dict(
             signature.to_dict(),
-            "signature.json",
+            f"{MLFLOW_STAGE}/signature.json",
         )
         logger.info(
             "MLflow test evaluation run created: experiment=%s, "

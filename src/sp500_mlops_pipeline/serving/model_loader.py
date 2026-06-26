@@ -14,6 +14,7 @@ DEFAULT_TRACKING_URI = "http://127.0.0.1:5000"
 MODEL_NAME = "sp500_direction_model"
 MODEL_ALIAS = "candidate_champion"
 MODEL_URI = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
+
 FEATURE_NAMES = [
     "simple_return",
     "log_return",
@@ -43,9 +44,11 @@ class ModelService:
             [[feature_values[name] for name in self.feature_names]],
             columns=self.feature_names,
         )
+
         prediction = int(self.model.predict(model_input)[0])
         probabilities = np.asarray(self.model.predict_proba(model_input))[0]
         classes = list(self.model.classes_)
+
         probability_by_class = {
             int(label): float(probability)
             for label, probability in zip(classes, probabilities)
@@ -65,13 +68,21 @@ def load_candidate_champion_model() -> ModelService:
     """Load the candidate champion once from the MLflow Model Registry."""
     tracking_uri = os.getenv("MLFLOW_TRACKING_URI", DEFAULT_TRACKING_URI)
     mlflow.set_tracking_uri(tracking_uri)
+
     client = MlflowClient(tracking_uri=tracking_uri)
     model_version = client.get_model_version_by_alias(MODEL_NAME, MODEL_ALIAS)
-    model = mlflow.sklearn.load_model(MODEL_URI)
+
+    local_model_path = os.getenv("LOCAL_MODEL_PATH")
+
+    if local_model_path:
+        model = mlflow.sklearn.load_model(local_model_path)
+    else:
+        model = mlflow.sklearn.load_model(MODEL_URI)
 
     trained_feature_names = list(
         getattr(model, "feature_names_in_", FEATURE_NAMES)
     )
+
     if trained_feature_names != FEATURE_NAMES:
         raise ValueError(
             "Registered model feature order does not match the serving contract"

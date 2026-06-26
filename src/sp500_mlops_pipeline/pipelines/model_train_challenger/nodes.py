@@ -18,11 +18,17 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from sp500_mlops_pipeline.pipelines.mlflow_utils import (
+    active_or_new_mlflow_run,
+    prefix_keys,
+)
+
 
 logger = logging.getLogger(__name__)
 
 RUN_NAME = "random_forest_challenger_v2"
 MODEL_NAME = "random_forest_challenger_model"
+MLFLOW_STAGE = "challenger_training"
 
 
 def train_and_evaluate_challenger_model(
@@ -64,7 +70,9 @@ def train_and_evaluate_challenger_model(
         experiment_id = experiment.experiment_id
 
     mlflow.set_experiment(experiment_id=experiment_id)
-    with redirect_stdout(io.StringIO()), mlflow.start_run(run_name=RUN_NAME) as run:
+    with redirect_stdout(io.StringIO()), active_or_new_mlflow_run(
+        run_name=RUN_NAME
+    ) as run:
         model.fit(X_train, train_target)
 
         predictions = model.predict(X_val)
@@ -79,20 +87,23 @@ def train_and_evaluate_challenger_model(
             "roc_auc": float(roc_auc_score(validation_target, probabilities)),
         }
 
-        mlflow.log_params(model_parameters)
-        mlflow.log_metrics(metrics)
+        mlflow.log_params(prefix_keys(model_parameters, MLFLOW_STAGE))
+        mlflow.log_metrics(prefix_keys(metrics, MLFLOW_STAGE))
         mlflow.set_tags(
-            {
-                "dataset": "sp500_feature_data",
-                "split_strategy": "chronological_70_15_15",
-                "model_family": "random_forest",
-                "model_role": "challenger",
-                "pipeline_stage": "challenger_training",
-            }
+            prefix_keys(
+                {
+                    "dataset": "sp500_feature_data",
+                    "split_strategy": "chronological_70_15_15",
+                    "model_family": "random_forest",
+                    "model_role": "challenger",
+                    "pipeline_stage": MLFLOW_STAGE,
+                },
+                MLFLOW_STAGE,
+            )
         )
         mlflow.log_dict(
             {"features": X_train.columns.tolist()},
-            "feature_columns.json",
+            f"{MLFLOW_STAGE}/feature_columns.json",
         )
 
         input_example = X_train.head(5)

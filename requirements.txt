@@ -13,4 +13,6 @@ pydantic
 great_expectations
 evidently
 streamlit
+python-dotenv
+hopsworks
 pytest
