@@ -60,3 +60,4 @@ STATUS_22JUN_FINAL.txt
 # MLflow local store
 mlflow.db
 data/08_reporting/mlflow_artifacts/
+.hopsworks/

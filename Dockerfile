@@ -3,7 +3,8 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/src \
-    MLFLOW_TRACKING_URI=http://host.docker.internal:5000
+    MLFLOW_TRACKING_URI=http://host.docker.internal:5000 \
+    LOCAL_MODEL_PATH=/app/model_artifacts
 
 WORKDIR /app
 
@@ -18,6 +19,8 @@ RUN pip install --no-cache-dir \
 
 COPY src/sp500_mlops_pipeline/__init__.py src/sp500_mlops_pipeline/__init__.py
 COPY src/sp500_mlops_pipeline/serving src/sp500_mlops_pipeline/serving
+
+COPY data/08_reporting/mlflow_artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts /app/model_artifacts
 
 EXPOSE 8000
 

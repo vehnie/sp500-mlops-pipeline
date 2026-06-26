@@ -1,5 +1,16 @@
 .venv
-data
+
+# Excluir todos os dados por defeito
+data/*
+
+# Incluir apenas o artefacto do modelo champion necessário para a imagem Docker
+!data/08_reporting/
+!data/08_reporting/mlflow_artifacts/
+!data/08_reporting/mlflow_artifacts/models/
+!data/08_reporting/mlflow_artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/
+!data/08_reporting/mlflow_artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/
+!data/08_reporting/mlflow_artifacts/models/m-09d8d2dd77f049b8a3a306241652cbc7/artifacts/**
+
 mlruns
 mlflow.db
 __pycache__

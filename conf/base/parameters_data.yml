@@ -1,0 +1,12 @@
+data_ingestion:
+  ticker: "^GSPC"
+  start_date: "2001-01-01"
+  yfinance_cache_dir: "data/08_reporting/yfinance_cache"
+
+feature_store:
+  feature_group_name: "sp500_market_features"
+  feature_group_version: 1
+  feature_view_name: "sp500_direction_training_view"
+  feature_view_version: 1
+  env_path: ".env"
+  wait_for_job: true

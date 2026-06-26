@@ -86,6 +86,16 @@ random_forest_test_metrics:
   type: json.JSONDataset
   filepath: data/07_model_output/random_forest_test_metrics.json
 
+logistic_regression_prediction_overlay_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/logistic_regression_prediction_overlay.png
+  overwrite: true
+
+random_forest_prediction_overlay_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/random_forest_prediction_overlay.png
+  overwrite: true
+
 raw_data_validation_report:
   type: json.JSONDataset
   filepath: data/08_reporting/great_expectations/raw_data_validation_report.json
@@ -93,6 +103,10 @@ raw_data_validation_report:
 feature_data_validation_report:
   type: json.JSONDataset
   filepath: data/08_reporting/great_expectations/feature_data_validation_report.json
+
+feature_store_upload_summary:
+  type: json.JSONDataset
+  filepath: data/08_reporting/feature_store/upload_summary.json
 
 raw_data_validation_report_html:
   type: text.TextDataset
@@ -118,6 +132,31 @@ data_drift_report:
 data_drift_summary:
   type: json.JSONDataset
   filepath: data/08_reporting/drift/data_drift_summary.json
+
+sp500_close_price_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/sp500_close_price.png
+  overwrite: true
+
+sp500_daily_returns_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/sp500_daily_returns.png
+  overwrite: true
+
+sp500_rolling_volatility_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/sp500_rolling_volatility_10d.png
+  overwrite: true
+
+sp500_target_distribution_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/sp500_target_distribution.png
+  overwrite: true
+
+sp500_temporal_split_plot:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/plots/sp500_temporal_split.png
+  overwrite: true
 
 logistic_regression_v2_global_feature_importance:
   type: pandas.CSVDataset
