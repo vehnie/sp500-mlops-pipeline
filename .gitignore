@@ -79,3 +79,5 @@ report_render*.pdf
 report_render*.png
 *_candidate.docx
 *_candidate.pdf
+
+tools/
