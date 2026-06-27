@@ -1,0 +1,21 @@
+{
+  "feature_group_name": "sp500_market_features",
+  "feature_group_version": 1,
+  "feature_view_name": "sp500_direction_training_view",
+  "feature_view_version": 1,
+  "primary_key": "Date",
+  "event_time": "Date",
+  "feature_columns": [
+    "simple_return",
+    "log_return",
+    "sma_10",
+    "sma_20",
+    "sma_ratio_10",
+    "rsi_14",
+    "volatility_10",
+    "volume_change"
+  ],
+  "target_column": "target_next_day_up",
+  "rows_uploaded": 6386,
+  "feature_view_created": true
+}

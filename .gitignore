@@ -55,9 +55,27 @@ playground/
 
 # Local test temp
 .temp_pytest_antonio/
+.temp_pytest*/
+.pytest_tmp/
 STATUS_22JUN_FINAL.txt
 
 # MLflow local store
 mlflow.db
 data/08_reporting/mlflow_artifacts/
 .hopsworks/
+mlartifacts/
+mlruns/
+
+# Kedro Viz local state
+.viz/
+
+# Local caches
+data/08_reporting/yfinance_cache/
+
+# Local report/document render scratch outputs
+tmp_docx_work/
+report_render*/
+report_render*.pdf
+report_render*.png
+*_candidate.docx
+*_candidate.pdf

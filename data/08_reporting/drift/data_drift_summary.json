@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-22T16:46:21.165823+00:00",
-  "reference_rows": 4622,
-  "current_rows": 1982,
+  "generated_at": "2026-06-25T15:31:56.930590+00:00",
+  "reference_rows": 4470,
+  "current_rows": 1916,
   "features": [
     "simple_return",
     "log_return",
@@ -19,49 +19,49 @@
   "column_drift": {
     "simple_return": {
       "drift_detected": false,
-      "drift_score": 0.05736301637702353,
+      "drift_score": 0.052676848607911914,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "log_return": {
       "drift_detected": false,
-      "drift_score": 0.05709040377300191,
+      "drift_score": 0.052318847918218864,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "sma_10": {
       "drift_detected": true,
-      "drift_score": 6.1453912574178045,
+      "drift_score": 5.765179860731165,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "sma_20": {
       "drift_detected": true,
-      "drift_score": 6.15358575433675,
+      "drift_score": 5.7659454152922835,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "sma_ratio_10": {
       "drift_detected": true,
-      "drift_score": 0.10546153296344712,
+      "drift_score": 0.11670024817224733,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "rsi_14": {
       "drift_detected": true,
-      "drift_score": 0.1734486754776551,
+      "drift_score": 0.16710856050768508,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "volatility_10": {
       "drift_detected": false,
-      "drift_score": 0.07126643124496544,
+      "drift_score": 0.07850769904014539,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     },
     "volume_change": {
       "drift_detected": false,
-      "drift_score": 0.09698069704512889,
+      "drift_score": 0.09089505183036026,
       "method": "Wasserstein distance (normed)",
       "threshold": 0.1
     }

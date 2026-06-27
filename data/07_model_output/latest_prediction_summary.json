@@ -1,0 +1,7 @@
+{
+  "date":1782259200000,
+  "model":"logistic_regression",
+  "predicted_class":1,
+  "predicted_label":"up",
+  "probability_up":0.5260846957
+}
